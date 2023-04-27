@@ -11,6 +11,14 @@ async function run(): Promise<void> {
       repo: github.context.repo.repo
     }
 
+    console.log(
+      github.context.ref,
+      github.context.payload.pull_request,
+      github.context.payload.repository
+    )
+
+    console.log('===========================================\n\n')
+
     const {data: pr} = await octokit.rest.pulls.get({
       ...credentials,
       pull_number: github?.context?.payload?.pull_request?.number || 1
@@ -18,12 +26,16 @@ async function run(): Promise<void> {
 
     console.log(pr)
 
+    console.log('===========================================\n\n')
+
     const {data: commits} = await octokit.rest.pulls.listCommits({
       ...credentials,
       pull_number: github?.context?.payload?.pull_request?.number || 1
     })
 
     console.log(commits)
+
+    console.log('===========================================\n\n')
 
     core.notice('before pull')
 
@@ -35,6 +47,8 @@ async function run(): Promise<void> {
 
     core.info(data.toString())
     console.log(data)
+
+    console.log('===========================================\n\n')
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
