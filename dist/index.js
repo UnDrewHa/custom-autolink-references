@@ -45,15 +45,13 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const githubToken = core.getInput('github_token', { required: true });
-            const sourceBranch = github.context.ref.replace(/^refs\/heads\//, '');
             const credentials = {
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo
             };
             const octokit = github.getOctokit(githubToken);
             core.notice('before pull');
-            const branchHead = `${credentials.owner}:${sourceBranch}`;
-            const { data } = yield octokit.rest.pulls.list(Object.assign(Object.assign({}, credentials), { base: 'main', head: branchHead }));
+            const { data } = yield octokit.rest.pulls.list(Object.assign({}, credentials));
             core.notice('after pull');
             core.info(data.toString());
             console.log(data);

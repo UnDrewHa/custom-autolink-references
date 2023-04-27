@@ -4,7 +4,6 @@ import * as github from '@actions/github'
 async function run(): Promise<void> {
   try {
     const githubToken = core.getInput('github_token', {required: true})
-    const sourceBranch = github.context.ref.replace(/^refs\/heads\//, '')
 
     const credentials = {
       owner: github.context.repo.owner,
@@ -15,11 +14,8 @@ async function run(): Promise<void> {
 
     core.notice('before pull')
 
-    const branchHead = `${credentials.owner}:${sourceBranch}`
     const {data} = await octokit.rest.pulls.list({
-      ...credentials,
-      base: 'main',
-      head: branchHead
+      ...credentials
     })
 
     core.notice('after pull')
