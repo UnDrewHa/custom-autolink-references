@@ -1,29 +1,37 @@
-import * as core from '@actions/core'
-import * as github from '@actions/github'
+import * as core from '@actions/core';
+import * as github from '@actions/github';
+import {octokit} from './octokit';
+import {credentials} from './consts';
+import {getLinksBlock, getLinksList, getPreparedPullRequestBody} from './utils';
 
 async function run(): Promise<void> {
   try {
-    const githubToken = core.getInput('github_token', {required: true})
-    const sourceBranch = github.context.ref.replace(/^refs\/heads\//, '')
+    const pullRequest = github.context.payload.pull_request;
 
-    const credentials = {
-      owner: github.context.repo.owner,
-      repo: github.context.repo.repo
+    if (typeof pullRequest?.number !== 'number') {
+      core.setFailed('Please, use this github actions only for pull requests!');
     }
 
-    const octokit = github.getOctokit(githubToken)
+    const links = await getLinksList();
 
-    const branchHead = `${credentials.owner}:${sourceBranch}`
-    const {data} = await octokit.rest.pulls.list({
+    if (links.length === 0) {
+      core.debug('Task links not found.');
+      return;
+    }
+
+    const linksBlock = getLinksBlock(links);
+
+    const body =
+      linksBlock + getPreparedPullRequestBody(pullRequest!.body || '');
+
+    await octokit.rest.pulls.update({
       ...credentials,
-      base: 'main',
-      head: branchHead
-    })
-
-    core.info(data.toString())
+      pull_number: pullRequest!.number,
+      body
+    });
   } catch (error) {
-    if (error instanceof Error) core.setFailed(error.message)
+    if (error instanceof Error) core.setFailed(error.message);
   }
 }
 
-run()
+run();

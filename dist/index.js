@@ -1,6 +1,58 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 4831:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.credentials = exports.bodyRegexp = exports.linksBlockTitle = exports.taskNumberRegexp = exports.taskUrlPlaceholder = exports.taskUrlPattern = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const core = __importStar(__nccwpck_require__(2186));
+const taskNumberRegexpFromParams = core.getInput('task_number_regexp', {
+    required: true
+});
+exports.taskUrlPattern = core.getInput('task_url_pattern', {
+    required: true
+});
+exports.taskUrlPlaceholder = core.getInput('task_url_placeholder', {
+    required: true
+});
+exports.taskNumberRegexp = new RegExp(`\\b${taskNumberRegexpFromParams}\\b`, 'ig');
+exports.linksBlockTitle = '#### Tasks associated with this pull request:';
+exports.bodyRegexp = new RegExp(`(^${exports.linksBlockTitle}\\n\\n)((?:- \\[${taskNumberRegexpFromParams}\\].+\\n)+)---`, 'i');
+exports.credentials = {
+    owner: github.context.repo.owner,
+    repo: github.context.repo.repo
+};
+
+
+/***/ }),
+
 /***/ 3109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -41,19 +93,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
+const octokit_1 = __nccwpck_require__(3258);
+const consts_1 = __nccwpck_require__(4831);
+const utils_1 = __nccwpck_require__(918);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const githubToken = core.getInput('github_token', { required: true });
-            const sourceBranch = github.context.ref.replace(/^refs\/heads\//, '');
-            const credentials = {
-                owner: github.context.repo.owner,
-                repo: github.context.repo.repo
-            };
-            const octokit = github.getOctokit(githubToken);
-            const branchHead = `${credentials.owner}:${sourceBranch}`;
-            const { data } = yield octokit.rest.pulls.list(Object.assign(Object.assign({}, credentials), { base: 'main', head: branchHead }));
-            core.info(data.toString());
+            const pullRequest = github.context.payload.pull_request;
+            if (typeof (pullRequest === null || pullRequest === void 0 ? void 0 : pullRequest.number) !== 'number') {
+                core.setFailed('Please, use this github actions only for pull requests!');
+            }
+            const links = yield (0, utils_1.getLinksList)();
+            if (links.length === 0) {
+                core.debug('Task links not found.');
+                return;
+            }
+            const linksBlock = (0, utils_1.getLinksBlock)(links);
+            const body = linksBlock + (0, utils_1.getPreparedPullRequestBody)(pullRequest.body || '');
+            yield octokit_1.octokit.rest.pulls.update(Object.assign(Object.assign({}, consts_1.credentials), { pull_number: pullRequest.number, body }));
         }
         catch (error) {
             if (error instanceof Error)
@@ -62,6 +119,114 @@ function run() {
     });
 }
 run();
+
+
+/***/ }),
+
+/***/ 3258:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.octokit = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
+exports.octokit = github.getOctokit(core.getInput('github_token', { required: true }));
+
+
+/***/ }),
+
+/***/ 918:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.getPreparedPullRequestBody = exports.getLinksBlock = exports.getLinksList = void 0;
+const github = __importStar(__nccwpck_require__(5438));
+const octokit_1 = __nccwpck_require__(3258);
+const consts_1 = __nccwpck_require__(4831);
+function getLinksList() {
+    var _a;
+    return __awaiter(this, void 0, void 0, function* () {
+        const pullRequest = github.context.payload.pull_request;
+        const { data: commits } = yield octokit_1.octokit.rest.pulls.listCommits(Object.assign(Object.assign({}, consts_1.credentials), { pull_number: pullRequest.number }));
+        const links = [];
+        links.push(...(pullRequest.head.ref.match(consts_1.taskNumberRegexp) || []));
+        for (const { commit } of commits) {
+            links.push(...(((_a = commit.message) === null || _a === void 0 ? void 0 : _a.match(consts_1.taskNumberRegexp)) || []));
+        }
+        return links;
+    });
+}
+exports.getLinksList = getLinksList;
+function getLinksBlock(links) {
+    const linksString = Array.from(new Set(links))
+        .map(link => `- [${link}](${consts_1.taskUrlPattern.replace(consts_1.taskUrlPlaceholder, link)})`)
+        .join('\n');
+    return `${consts_1.linksBlockTitle}\n\n${linksString}\n---\n\n`;
+}
+exports.getLinksBlock = getLinksBlock;
+function getPreparedPullRequestBody(body) {
+    return body.replace(/\r\n/g, '\n').replace(consts_1.bodyRegexp, '');
+}
+exports.getPreparedPullRequestBody = getPreparedPullRequestBody;
 
 
 /***/ }),
