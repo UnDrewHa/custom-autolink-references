@@ -18,3 +18,6 @@ jobs:
       - uses: ./
         with:
           github_token: ${{ secrets.TOKEN }}
+          task_url_pattern: 'https://youtrack.domain.com/youtrack/issue/{{task_number}}'
+          task_url_placeholder: '{{task_number}}'
+          task_number_regexp: '^TASK-\\d+'

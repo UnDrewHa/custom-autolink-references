@@ -4,6 +4,16 @@ import * as github from '@actions/github'
 async function run(): Promise<void> {
   try {
     const githubToken = core.getInput('github_token', {required: true})
+    const taskUrlPattern = core.getInput('task_url_pattern', {required: true})
+    const taskUrlPlaceholder = core.getInput('task_url_placeholder', {
+      required: true
+    })
+    const taskNumberRegexp = new RegExp(
+      core.getInput('task_number_regexp', {
+        required: true
+      }),
+      'ig'
+    )
     const octokit = github.getOctokit(githubToken)
 
     const credentials = {
@@ -11,48 +21,28 @@ async function run(): Promise<void> {
       repo: github.context.repo.repo
     }
 
-    console.log(github.context.ref)
+    const links = []
 
-    console.log('===========================================\n\n')
+    const pull_request = github.context.payload.pull_request
 
-    console.log(github.context.payload.pull_request)
-
-    console.log('===========================================\n\n')
-
-    console.log(github.context.payload.repository)
-
-    console.log('===========================================\n\n')
-
-    const {data: pr} = await octokit.rest.pulls.get({
-      ...credentials,
-      pull_number: github?.context?.payload?.pull_request?.number || 1
-    })
-
-    console.log(pr)
-
-    console.log('===========================================\n\n')
+    links.push(...('ref'.match(taskNumberRegexp) || []))
 
     const {data: commits} = await octokit.rest.pulls.listCommits({
       ...credentials,
       pull_number: github?.context?.payload?.pull_request?.number || 1
     })
 
-    console.log(commits)
+    for (const {commit} of commits) {
+      links.push(...(commit.message.match(taskNumberRegexp) || []))
+    }
 
-    console.log('===========================================\n\n')
-
-    core.notice('before pull')
-
-    const {data} = await octokit.rest.pulls.list({
-      ...credentials
-    })
-
-    core.notice('after pull')
-
-    core.info(data.toString())
-    console.log(data)
-
-    console.log('===========================================\n\n')
+    console.log(
+      links,
+      taskUrlPattern,
+      taskUrlPlaceholder,
+      taskNumberRegexp,
+      pull_request
+    )
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

@@ -5,6 +5,15 @@ inputs:
   github_token:
     description: 'The GITHUB_TOKEN secret'
     required: true
+  task_url_pattern:
+    description: 'e.g. https://youtrack.domain.com/youtrack/issue/{{task_number}}'
+    required: true
+  task_url_placeholder:
+    description: 'e.g. "{{task_number}}"'
+    required: true
+  task_number_regexp:
+    description: 'e.g. "^TASK-\d+"'
+    required: true
 runs:
   using: 'node16'
   main: 'dist/index.js'
