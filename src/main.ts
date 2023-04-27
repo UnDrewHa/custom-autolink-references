@@ -23,9 +23,9 @@ async function run(): Promise<void> {
 
     const links = []
 
-    const pull_request = github.context.payload.pull_request
+    const PR = github.context.payload.pull_request
 
-    links.push(...('ref'.match(taskNumberRegexp) || []))
+    links.push(...(PR?.head?.ref?.match(taskNumberRegexp) || []))
 
     const {data: commits} = await octokit.rest.pulls.listCommits({
       ...credentials,
@@ -36,13 +36,7 @@ async function run(): Promise<void> {
       links.push(...(commit.message.match(taskNumberRegexp) || []))
     }
 
-    console.log(
-      links,
-      taskUrlPattern,
-      taskUrlPlaceholder,
-      taskNumberRegexp,
-      pull_request
-    )
+    console.log(links, taskUrlPattern, taskUrlPlaceholder, taskNumberRegexp)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
