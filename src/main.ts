@@ -11,11 +11,15 @@ async function run(): Promise<void> {
       repo: github.context.repo.repo
     }
 
-    console.log(
-      github.context.ref,
-      github.context.payload.pull_request,
-      github.context.payload.repository
-    )
+    console.log(github.context.ref)
+
+    console.log('===========================================\n\n')
+
+    console.log(github.context.payload.pull_request)
+
+    console.log('===========================================\n\n')
+
+    console.log(github.context.payload.repository)
 
     console.log('===========================================\n\n')
 

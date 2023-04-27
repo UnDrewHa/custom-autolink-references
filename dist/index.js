@@ -51,7 +51,11 @@ function run() {
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo
             };
-            console.log(github.context.ref, github.context.payload.pull_request, github.context.payload.repository);
+            console.log(github.context.ref);
+            console.log('===========================================\n\n');
+            console.log(github.context.payload.pull_request);
+            console.log('===========================================\n\n');
+            console.log(github.context.payload.repository);
             console.log('===========================================\n\n');
             const { data: pr } = yield octokit.rest.pulls.get(Object.assign(Object.assign({}, credentials), { pull_number: ((_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.number) || 1 }));
             console.log(pr);
