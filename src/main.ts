@@ -5,6 +5,8 @@ async function run(): Promise<void> {
   try {
     const githubToken = core.getInput('github_token', {required: true})
 
+    console.log(github.context)
+
     const credentials = {
       owner: github.context.repo.owner,
       repo: github.context.repo.repo

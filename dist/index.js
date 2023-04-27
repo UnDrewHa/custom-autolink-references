@@ -45,6 +45,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const githubToken = core.getInput('github_token', { required: true });
+            console.log(github.context);
             const credentials = {
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo
