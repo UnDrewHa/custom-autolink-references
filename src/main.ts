@@ -20,7 +20,7 @@ async function run(): Promise<void> {
       head: branchHead
     })
 
-    core.notice(data.toString())
+    core.setFailed(data.toString())
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
