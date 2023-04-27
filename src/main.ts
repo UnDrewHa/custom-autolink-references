@@ -13,6 +13,8 @@ async function run(): Promise<void> {
 
     const octokit = github.getOctokit(githubToken)
 
+    core.notice('before pull')
+
     const branchHead = `${credentials.owner}:${sourceBranch}`
     const {data} = await octokit.rest.pulls.list({
       ...credentials,
@@ -20,7 +22,10 @@ async function run(): Promise<void> {
       head: branchHead
     })
 
-    core.setFailed(data.toString())
+    core.notice('after pull')
+
+    core.info(data.toString())
+    console.log(data)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }

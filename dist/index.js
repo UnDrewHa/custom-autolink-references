@@ -51,9 +51,12 @@ function run() {
                 repo: github.context.repo.repo
             };
             const octokit = github.getOctokit(githubToken);
+            core.notice('before pull');
             const branchHead = `${credentials.owner}:${sourceBranch}`;
             const { data } = yield octokit.rest.pulls.list(Object.assign(Object.assign({}, credentials), { base: 'main', head: branchHead }));
-            core.setFailed(data.toString());
+            core.notice('after pull');
+            core.info(data.toString());
+            console.log(data);
         }
         catch (error) {
             if (error instanceof Error)
