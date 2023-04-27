@@ -18,6 +18,13 @@ async function run(): Promise<void> {
 
     console.log(pr)
 
+    const {data: commits} = await octokit.rest.pulls.listCommits({
+      ...credentials,
+      pull_number: github?.context?.payload?.pull_request?.number || 1
+    })
+
+    console.log(commits)
+
     core.notice('before pull')
 
     const {data} = await octokit.rest.pulls.list({
