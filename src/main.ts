@@ -4,15 +4,19 @@ import * as github from '@actions/github'
 async function run(): Promise<void> {
   try {
     const githubToken = core.getInput('github_token', {required: true})
-
-    console.log(github.context)
+    const octokit = github.getOctokit(githubToken)
 
     const credentials = {
       owner: github.context.repo.owner,
       repo: github.context.repo.repo
     }
 
-    const octokit = github.getOctokit(githubToken)
+    const {data: pr} = await octokit.rest.pulls.get({
+      ...credentials,
+      pull_number: github?.context?.payload?.pull_request?.number || 1
+    })
+
+    console.log(pr)
 
     core.notice('before pull')
 

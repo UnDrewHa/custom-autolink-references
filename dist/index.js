@@ -42,15 +42,17 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
 function run() {
+    var _a, _b, _c;
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const githubToken = core.getInput('github_token', { required: true });
-            console.log(github.context);
+            const octokit = github.getOctokit(githubToken);
             const credentials = {
                 owner: github.context.repo.owner,
                 repo: github.context.repo.repo
             };
-            const octokit = github.getOctokit(githubToken);
+            const { data: pr } = yield octokit.rest.pulls.get(Object.assign(Object.assign({}, credentials), { pull_number: ((_c = (_b = (_a = github === null || github === void 0 ? void 0 : github.context) === null || _a === void 0 ? void 0 : _a.payload) === null || _b === void 0 ? void 0 : _b.pull_request) === null || _c === void 0 ? void 0 : _c.number) || 1 }));
+            console.log(pr);
             core.notice('before pull');
             const { data } = yield octokit.rest.pulls.list(Object.assign({}, credentials));
             core.notice('after pull');
