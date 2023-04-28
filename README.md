@@ -6,6 +6,6 @@
 
 ## TODO:
 
-[] Refactor code
-[] Make it testable
-[] Write some tests
+- [ ] Refactor code
+- [ ] Make it testable
+- [ ] Write some tests
