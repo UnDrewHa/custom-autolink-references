@@ -1,11 +1,19 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'custom-autolink-references'
+description: 'Action for create custom autolinks to external resources'
+author: 'https://github.com/UnDrewHa'
 inputs:
-  milliseconds: # change this
+  github_token:
+    description: 'The GITHUB_TOKEN secret'
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+  task_url_pattern:
+    description: 'e.g. https://youtrack.domain.com/youtrack/issue/{{task_number}}'
+    required: true
+  task_url_placeholder:
+    description: 'e.g. "{{task_number}}"'
+    required: true
+  task_number_regexp:
+    description: 'e.g. "^TASK-\d+"'
+    required: true
 runs:
   using: 'node16'
   main: 'dist/index.js'
